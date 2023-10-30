@@ -1,5 +1,4 @@
 From mathcomp Require Import all_algebra all_ssreflect.
-From HB Require Import structures.
 Set Implicit Arguments.
 Unset Strict Implicit. 
 Unset Printing Implicit Defensive.
