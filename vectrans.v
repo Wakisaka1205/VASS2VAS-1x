@@ -78,17 +78,17 @@ Qed.
 
 End VS.
 
-Section vtrans_vs.
+Section ab_consistent.
 Variables (state : finType) (a b : state -> nat).
-Definition vtrans_vs :=
+Definition ab_consistent :=
  forall (p p' q : state) (i i' : 'Z_3),
  vtrans (vs a b p i) (vst a b p' q i') =  
  if (p' == p) && (i' == i) then Some (vs a b q (i + 1)%R) else None.
-Definition vtrans_vs0 := 
+Definition ab_consistent0 := 
  forall (p p' q : state) (i : 'Z_3),
  vtrans (vs a b p 0%R) (vst a b p' q i) = 
  if (p' == p) && (i == 0%R) then Some (vs a b q 1%R) else None. 
-Definition vtrans_ab := 
+Definition ab_aligned := 
  injective a 
  /\ (forall p q : state, a p > a q -> forall r : state, a r + b p < b q)
  /\ forall p q : state, a p < b q.
@@ -102,7 +102,7 @@ Proof.
  by rewrite /vst vrot_vrotr_sub /vrotr opprD opprK addrC.
 Qed.
 
-Lemma vtrans_vs0_vs : vtrans_vs0 <-> vtrans_vs.
+Lemma ab_consistent0_vs : ab_consistent0 <-> ab_consistent.
 Proof.
  split; last by move=>H p p' q i; rewrite (H p p' q (0%R : 'Z_3) i).
  move=> H_vs0 p p' q i i'.
@@ -112,9 +112,9 @@ Proof.
  by rewrite /vs vrot_vrotr_sub opprD addrA subrr sub0r.
 Qed.
  
-Lemma vtrans_ab_vs0 : vtrans_ab -> vtrans_vs0.
+Lemma ab_aligned_vs0 : ab_aligned -> ab_consistent0.
 Proof.
- rewrite /vtrans_vs0 /vtrans_ab => -[inj_a [a_gt_bpbq a_gt_b]] p p' q i. 
+ rewrite /ab_consistent0 /ab_aligned => -[inj_a [a_gt_bpbq a_gt_b]] p p' q i. 
  case: ifP.
   move/andP => [/eqP <- /eqP ->].
   rewrite /vtrans; case: insubP=> [w|].
@@ -139,14 +139,14 @@ Proof.
  by move: (a_gt_b q q) (a_gt_bpbq q p' h p); lia.
 Qed.
 
-Lemma vtrans_ab_vs :vtrans_ab -> vtrans_vs.
+Lemma ab_aligned_vs :ab_aligned -> ab_consistent.
 Proof.
- by move => H_ab; rewrite -vtrans_vs0_vs; apply: vtrans_ab_vs0.
+ by move => H_ab; rewrite -ab_consistent0_vs; apply: ab_aligned_vs0.
 Qed.
 
-Lemma injective_a : vtrans_vs -> injective a.
+Lemma injective_a : ab_consistent -> injective a.
 Proof. 
- move => /vtrans_vs0_vs H_vs0 p q.
+ move => /ab_consistent0_vs H_vs0 p q.
  wlog le_bqp : p q / b p <= b q => [Hb|ap_aq].
   case: (orP (leq_total (b p) (b q))) => /Hb // Ha /esym apaq. 
   by apply: esym; apply: Ha.
@@ -160,10 +160,10 @@ Proof.
  by rewrite H_vs0 andbT; case: eqP.
 Qed.
 
-Lemma inc_a_dec_b : vtrans_vs -> forall p q : state, a p > a q -> 
+Lemma inc_a_dec_b : ab_consistent -> forall p q : state, a p > a q -> 
  (forall r : state, (a r + b p)%N < b q).
 Proof.
- rewrite -vtrans_vs0_vs => H_vs0 p q ap_aq r.
+ rewrite -ab_consistent0_vs => H_vs0 p q ap_aq r.
  move: (H_vs0 p q r 0%R); rewrite /vtrans.
  case: insubP => [w|];last first.
   rewrite negb_forall; move/existsP=> -[i].
@@ -174,7 +174,7 @@ Proof.
  by move/ffunP => /(_ 0%R); rewrite !ffunE subrr sub0r /tnth /=; lia.
 Qed.
 
-Lemma ap_lt_bq :  #|state| > 1 -> vtrans_vs -> 
+Lemma ap_lt_bq :  #|state| > 1 -> ab_consistent -> 
  forall p q : state, a p < b q.
 Proof.
  move => /card_gt1P H  H_vs r q. move: H => -[p [p']] [_ _].
@@ -190,7 +190,7 @@ Proof.
  by move/injective_a ->; rewrite ?eqxx.
 Qed.
 
-Lemma vtrans_vs_ab : #|state| > 1 -> vtrans_vs -> vtrans_ab.
+Lemma ab_consistent_ab : #|state| > 1 -> ab_consistent -> ab_aligned.
 Proof.
  move => H1 H_vs; repeat split.
    exact: injective_a.
@@ -198,10 +198,10 @@ Proof.
  exact: ap_lt_bq.
 Qed.
 
-Lemma vtrans_iff : #|state| > 1 -> vtrans_vs <-> vtrans_ab.
+Lemma vtrans_iff : #|state| > 1 -> ab_consistent <-> ab_aligned.
 Proof.
  move=> H; split.
-  exact: (vtrans_vs_ab H).
- exact: vtrans_ab_vs.
+  exact: (ab_consistent_ab H).
+ exact: ab_aligned_vs.
 Qed.
-End vtrans_vs.
+End ab_consistent.

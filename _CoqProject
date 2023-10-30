@@ -3,5 +3,3 @@ monad.v
 vecop.v
 vectrans.v
 VASStoVAS.v
-
--arg -w -arg -notation-overridden

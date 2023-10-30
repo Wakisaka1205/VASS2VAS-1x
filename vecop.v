@@ -1,4 +1,5 @@
 From mathcomp Require Import all_algebra all_ssreflect.
+From HB Require Import structures.
 Set Implicit Arguments.
 Unset Strict Implicit. 
 Unset Printing Implicit Defensive.
@@ -11,7 +12,7 @@ Definition vrot (i : 'I_n.+1) (v : T ^ n.+1) :=
  [ffun j : 'I_n.+1 => v (j + i)%R].
 Definition vrotr (i : 'I_n.+1) := vrot (- i)%R.
 
-Lemma vrotrK m : cancel (vrotr m) (vrot m).
+Lemma vrotrK i : cancel (vrotr i) (vrot i).
 Proof. by move=> ?; apply/ffunP=> ?; rewrite !ffunE addrK. Qed.
 
 Lemma vrotK i : cancel (vrot i) (vrotr i).
@@ -77,6 +78,7 @@ Proof.
 Qed.
 
 Canonical vnat_subType := SubType _ _ _ vnat_SubP vnat_SubK.
+
 End vSub.
 
 Section ComponetwiseOperation.
